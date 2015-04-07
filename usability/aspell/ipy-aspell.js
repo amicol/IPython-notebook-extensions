@@ -4,7 +4,7 @@
 spell_checker = function() {
 
     /* Put in the name of the machine running ipy-aspell-server.py here */
-    var aspell_server = 'nas:8989'; 
+    var aspell_server = 'document.domain:8989'; 
     /* or use "var aspell_server = 'document.domain:8989';" if aspell is running on your local computer */
 
     var wsUri = "ws://" + aspell_server + "/"+ "websocket"; 
@@ -76,7 +76,7 @@ spell_checker = function() {
         for (var i = 0; i < marked.length; ++i) marked[i].clear();
         marked.length = 0;
 
-        var regex = /[\w$]+/g;
+        var regex = /(([\w$])|([^\u0000-\u007F]))+/g;
           
         var cell=IPython.notebook.get_selected_cell();
         var cm = cell.code_mirror;
@@ -90,7 +90,7 @@ spell_checker = function() {
                 var start = matched.index;
                 var end = start + len;
                 var msg = JSON.stringify({"text":word, "line": i, "start":start, "end":end, "id":cell.cell_id});
-                IPython.notebook.ws.send(msg); 
+                ws.send(msg); 
             }
         }
     }

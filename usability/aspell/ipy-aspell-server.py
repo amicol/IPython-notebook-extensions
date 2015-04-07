@@ -29,13 +29,15 @@ from zmq.eventloop import ioloop, zmqstream
 
 webport = 8989 # port address for web client
  
-s = aspell.Speller('lang', 'en')
- 
+s = aspell.Speller('lang', 'fr')
+enc = s.ConfigKeys()[8][2] 
 GLOBALS={
     'sockets': []
 }
  
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
+    def check_origin(self, origin):
+            return True
     def open(self): 
         print "open socket"
         GLOBALS['sockets'].append(self)
@@ -47,16 +49,21 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_message(self, message):
         x=json.loads(message)
         text = x['text']
-        reply = s.check(text)
-        # reply to request:
-        #  check  1 for OK, 0 for not a valid word
-        #  id     cell_id
-        #  line   codemirror line number
-        #  start  codemirror start position of word
-        #  stop   codemirror end position of word
-        reply = {"check": reply, "id" : x['id'], "line": x['line'], 
-                 "start" : x['start'], "end": x['end'] }
-        self.write_message(reply) 
+        try:
+                reply = s.check(text.encode(enc))
+                # reply to request:
+                #  check  1 for OK, 0 for not a valid word
+                #  id     cell_id
+                #  line   codemirror line number
+                #  start  codemirror start position of word
+                #  stop   codemirror end position of word
+                reply = {"check": reply, "id" : x['id'], "line": x['line'], 
+                        "start" : x['start'], "end": x['end'] }
+                self.write_message(reply)
+        except:
+                reply = {"check": 0, "id" : x['id'], "line": x['line'],
+                         "start" : x['start'], "end": x['end'] }
+                self.write_message(reply)
  
 application = tornado.web.Application([
     (r"/websocket", WebSocketHandler),
@@ -64,7 +71,7 @@ application = tornado.web.Application([
 
 if __name__ == "__main__":
     ioloop.install()
-    
+
     application.listen(webport)
     main_loop = tornado.ioloop.IOLoop.instance()
     main_loop.start()
