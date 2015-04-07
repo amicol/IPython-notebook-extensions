@@ -1,0 +1,37 @@
+((*- extends 'article.tplx' -*))
+% Disable input cells
+((* block input_group *))
+((* endblock input_group *))
+
+((*- block data_png -*))
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=1.\textwidth]{((( output.metadata.filenames['image/png'] | posix_path )))}
+\caption{((( cell.metadata.get('listingCaption',{}).get('caption', '') ))) \label{((( cell.metadata.get('listingCaption',{}).get('label', '') )))}}
+\par
+\end{center}
+\end{figure}
+((*- endblock -*))
+
+((*- block data_jpg -*))
+\begin{center}
+\includegraphics[size={0.7\textwidth}{0.9\textheight}]{((( output.jpeg_filename | posix_path )))}
+\par
+\end{center}
+((*- endblock -*))
+
+((*- block data_svg -*))
+\begin{center}
+\includegraphics[width=0.7\textwidth]{((( output.svg_filename | posix_path )))}
+\par
+\end{center}
+((*- endblock -*))
+
+((*- block data_pdf -*))
+\begin{center}
+\includegraphics[width=0.7\textwidth]{((( output.pdf_filename | posix_path )))}
+\par
+\end{center}
+((*- endblock -*))
+
+
